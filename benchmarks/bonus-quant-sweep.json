@@ -1,0 +1,17 @@
+[
+  {
+    "quant": "UD-Q2_K_XL",
+    "size_gb": 0.39,
+    "tok_s": 2.05
+  },
+  {
+    "quant": "UD-Q4_K_XL",
+    "size_gb": 0.52,
+    "tok_s": 31.84
+  },
+  {
+    "quant": "UD-Q6_K_XL",
+    "size_gb": 0.72,
+    "tok_s": 25.05
+  }
+]

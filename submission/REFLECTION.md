@@ -6,8 +6,8 @@
 >
 > `make verify` sẽ fail nếu còn placeholder chưa điền. Đó là cố ý.
 
-**Họ Tên:** Học viên
-**Cohort:** A20-Track2
+**Họ Tên:** Ngô Hoàng Phú
+**Cohort:** K3B
 **Ngày submit:** 2026-08-20
 
 ---
@@ -127,19 +127,20 @@ Khác với các mô hình lớn (như 7B-8B) thường bị sụt giảm tốc 
 > Bỏ trống nếu không làm. Xem `bonus/README.md`. Đừng làm hết — **một** finding sâu
 > ăn điểm hơn năm bảng nông.
 
-**Đã làm:** _<B1 build-compare / B2 sweep nào / B4 challenge nào / B5 lựa chọn nào>_
+**Đã làm:** B2 (Sweep Quantization ladder `sweep-quant.py`), B3 (Speedup analysis), B4 (Challenge C5: Model nhỏ nhất vẫn hữu ích), B5 (Challenge C8: Semantic Cache `semantic-cache-offline`)
 
 **Numbers:**
 
 ```
-before:  <số>
-after:   <số>
-speedup: <X.Y>×
+before:  2.0 tok/s (UD-Q2_K_XL, 0.39 GB)
+after:   31.8 tok/s (UD-Q4_K_XL, 0.52 GB)
+speedup: 15.9×
 ```
 
 **Điều này nói lên gì mà deck chưa nói:**
 
-_(để trống nếu bạn không làm phần này)_
+1. **Về Quantization (B2/B4 - C5):** Lý thuyết trong deck nêu rằng giảm bit luôn giúp tăng tốc độ giải mã (decode) do giảm dung lượng bộ nhớ. Tuy nhiên, trên CPU không có kernel INT2 chuyên biệt, chi phí tính toán giải nén (dequantization) của CPU ALU lớn hơn rất nhiều so với băng thông RAM tiết kiệm được (chỉ tiết kiệm 0.13 GB). Tốc độ tại 2-bit bị sụp đổ (2.0 tok/s so với 31.8 tok/s ở 4-bit, chậm hơn gần 16 lần) và chất lượng bị gãy. Mức 4-bit (`UD-Q4_K_XL`) mới chính là điểm cân bằng tối ưu.
+2. **Về Semantic Cache (B5 - C8):** Semantic Cache giúp bắt các câu paraphrase cùng ý nghĩa và trả kết quả ở độ trễ 0 ms (tiết kiệm 100% chi phí prefill và decode). Tuy nhiên, rủi ro False Hit / False Miss rất nhạy cảm với threshold similarity khi dùng mean-pooling từ decoder model thay vì embedding model chuyên dụng. Ngoài ra, cần áp dụng Salting per-tenant để tránh timing side-channel attack giữa các người dùng.
 
 ---
 

@@ -107,7 +107,11 @@ switch ($Target) {
     'pipeline' { Py labs\03-integrate\pipeline.py @Rest }
 
     # verify must work with system Python too: the grader has no .venv.
-    'verify' { & $SysPy scripts\verify.py; exit $LASTEXITCODE }
+    'verify' {
+        $env:PYTHONIOENCODING = 'utf-8'
+        $env:PYTHONUTF8 = '1'
+        & $SysPy scripts\verify.py; exit $LASTEXITCODE
+    }
 
     'sweep-quant' { Py bonus\sweeps\quant-sweep.py @Rest }
     'sweep-ctx'   { Py bonus\sweeps\ctx-len-sweep.py @Rest }
