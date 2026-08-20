@@ -1,0 +1,104 @@
+{
+  "backend": "keyword overlap",
+  "mean_ms": {
+    "embed": 0.0,
+    "retrieve": 0.1,
+    "llm": 6683.2,
+    "total": 6683.4
+  },
+  "results": [
+    {
+      "query": "Why is goodput more useful than raw throughput?",
+      "answer": "Based on the context provided, **goodput** is more useful than raw throughput because it specifically accounts for the requests per second that met the **TTFT** (Target Throughput for Fullness) and **TPOT** (Target Throughput for Partial Overhead) targets.\n\nIn contrast, **raw throughput** ignores SLOs (Service Level Objects), meaning it does not consider how much of the capacity is actually utilized to meet the service's performance goals. Goodput ensures that the system's capacity is utilized efficiently by only counting requests that satisfy these specific throughput targets.",
+      "contexts": [
+        {
+          "id": "goodput",
+          "score": 1.0
+        },
+        {
+          "id": "paged",
+          "score": 0.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 7506.8,
+        "total": 7506.9
+      },
+      "server_timings": {
+        "prompt_n": 151,
+        "prompt_ms": 545.722,
+        "predicted_n": 117,
+        "predicted_ms": 3223.246
+      }
+    },
+    {
+      "query": "What problem does PagedAttention actually solve?",
+      "answer": "PagedAttention solves the problem of **internal fragmentation in GPU memory** by storing the KV cache in non-contiguous pages.\n\nThis is achieved by removing the internal fragmentation that would otherwise waste most GPU memory, allowing the engine to utilize more available memory for the actual computation.",
+      "contexts": [
+        {
+          "id": "paged",
+          "score": 1.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        },
+        {
+          "id": "disagg",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 4340.1,
+        "total": 4340.4
+      },
+      "server_timings": {
+        "prompt_n": 114,
+        "prompt_ms": 437.066,
+        "predicted_n": 56,
+        "predicted_ms": 1490.744
+      }
+    },
+    {
+      "query": "When does splitting prefill and decode help?",
+      "answer": "Splitting prefill and decode helps when the **compute-bound** nature of the prefill step conflicts with the **memory-bandwidth-bound** nature of the decode step.\n\nSpecifically, this optimization occurs in scenarios where:\n1.  **Prefill is compute-bound**: It requires significant processing power (e.g., GPU inference or heavy model quantization) but does not consume much memory.\n2.  **Decode is memory-bandwidth-bound**: It consumes significant memory but does not require heavy computation.\n\nBy splitting these operations, the model can:\n*   **Skip prefill entirely** when the decode step is the bottleneck, allowing the engine to focus on the memory-intensive part of the pipeline.\n*   **Maximize memory bandwidth** by only decoding the necessary tokens, thereby improving throughput and reducing latency.\n\nIn short, it helps when the **prefill step is computationally expensive** (or requires more compute than the memory bandwidth of the decode step) but the",
+      "contexts": [
+        {
+          "id": "disagg",
+          "score": 2.0
+        },
+        {
+          "id": "radix",
+          "score": 1.0
+        },
+        {
+          "id": "batching",
+          "score": 1.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 8202.7,
+        "total": 8202.8
+      },
+      "server_timings": {
+        "prompt_n": 113,
+        "prompt_ms": 415.388,
+        "predicted_n": 200,
+        "predicted_ms": 5413.254
+      }
+    }
+  ]
+}
