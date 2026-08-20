@@ -24,11 +24,6 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8")
-
 # Pinned llama.cpp release. Gemma 4 (architecture "gemma4", April 2026) needs a
 # build newer than that; this one is well past it. Bump deliberately, not casually.
 LLAMA_CPP_BUILD = "b10488"
@@ -235,73 +230,9 @@ def threads(hw: dict | None = None) -> int:
     return env_int("LAB_N_THREADS", hw.get("cpu", {}).get("cores_physical") or 4)
 
 
-_DEVICE_CACHE: dict[str, list[str]] = {}
-
-
-def visible_devices(binary: Path | None = None) -> list[str]:
-    """Accelerator devices the runtime binary can actually reach.
-
-    hardware.json answers "which GPU is installed", which is NOT the same question
-    as "can the llama.cpp build we downloaded use it". Upstream ships no Linux CUDA
-    asset, so an NVIDIA box on Linux gets the Vulkan build -- and with no Vulkan ICD
-    installed that build enumerates nothing and runs on CPU without complaining.
-    Asking the binary is the only answer that cannot be wrong.
-
-    Returns [] when there is no accelerator, no binary, or the probe fails.
-    """
-    exe = binary or runtime_bin("llama-server", required=False)
-    if not exe:
-        return []
-    key = str(exe)
-    if key in _DEVICE_CACHE:
-        return _DEVICE_CACHE[key]
-    devices: list[str] = []
-    try:
-        out = subprocess.run([str(exe), "--list-devices"], capture_output=True,
-                             text=True, check=False, timeout=60)
-        seen_header = False
-        for line in (out.stdout + out.stderr).splitlines():
-            if line.strip().startswith("Available devices:"):
-                seen_header = True
-                continue
-            if seen_header:
-                entry = line.strip()
-                if not entry or entry == "(none)":
-                    continue
-                if not line.startswith((" ", "\t")):
-                    break
-                devices.append(entry)
-    except (OSError, subprocess.SubprocessError):
-        devices = []
-    _DEVICE_CACHE[key] = devices
-    return devices
-
-
-def gpu_offload_is_live(hw: dict | None = None) -> tuple[bool, str]:
-    """(offload_available, human explanation). Used to keep reports honest."""
-    hw = hw if hw is not None else load_hardware(required=False)
-    if not any_gpu(hw):
-        return False, "no accelerator detected"
-    devices = visible_devices()
-    if devices:
-        return True, devices[0]
-    return False, ("an accelerator is installed but this llama.cpp build enumerates "
-                   "no devices -- offload would silently run on CPU")
-
-
 def n_gpu_layers(hw: dict | None = None) -> int:
-    """Layers to offload. Defaults to 0 unless the runtime really sees a device.
-
-    Reporting `ngl=99` while the binary is on CPU makes every generated benchmark
-    header claim a GPU run that never happened, so the default is verified rather
-    than assumed. Set LAB_N_GPU_LAYERS to override in either direction.
-    """
-    if (os.environ.get("LAB_N_GPU_LAYERS") or "").strip():
-        return env_int("LAB_N_GPU_LAYERS", 0)
     hw = hw if hw is not None else load_hardware(required=False)
-    if not any_gpu(hw):
-        return 0
-    return 99 if visible_devices() else 0
+    return env_int("LAB_N_GPU_LAYERS", 99 if any_gpu(hw) else 0)
 
 
 def n_ctx() -> int:
@@ -539,7 +470,7 @@ def die(*lines: str) -> None:
 
 
 def banner(title: str) -> None:
-    print(f"\n{'-' * 64}\n  {title}\n{'-' * 64}")
+    print(f"\n{'─' * 64}\n  {title}\n{'─' * 64}")
 
 
 def host_tag() -> str:
