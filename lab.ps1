@@ -22,6 +22,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
+if (Test-Path 'C:\Program Files\CMake\bin') { $env:Path += ';C:\Program Files\CMake\bin' }
+if (Test-Path 'C:\MinGW\bin') { $env:Path += ';C:\MinGW\bin' }
+
 $VenvPy = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
 $Port   = if ($env:LAB_SERVER_PORT) { $env:LAB_SERVER_PORT } else { '8080' }
 $SysPy  = 'python'
